@@ -1,0 +1,153 @@
+# ==============================================================================
+# MediGraph - .gitignore
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. Environment Variables & Secrets (CRITICAL FOR GITHUB)
+# ------------------------------------------------------------------------------
+.env
+.env.*
+.env.bak
+.env.backup
+*.env
+# Ensure example file is tracked so others can configure the project:
+!.env.example
+
+# ------------------------------------------------------------------------------
+# 2. Python & Virtual Environments
+# ------------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+apps/*/.venv/
+apps/*/*/venv/
+
+# Python packaging & distribution
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# ------------------------------------------------------------------------------
+# 3. Testing, Coverage & Linters
+# ------------------------------------------------------------------------------
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.coverage
+.coverage.*
+htmlcov/
+nosetests.xml
+coverage.xml
+*.cover
+
+# ------------------------------------------------------------------------------
+# 4. Node.js & Frontend (Next.js / React)
+# ------------------------------------------------------------------------------
+node_modules/
+apps/*/node_modules/
+.next/
+out/
+.turbo/
+.vercel/
+
+# Package manager logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ------------------------------------------------------------------------------
+# 5. AI / ML Models & Caches (Faster-Whisper, PaddleOCR, HuggingFace, Ollama)
+# ------------------------------------------------------------------------------
+.cache/
+.paddleocr/
+huggingface/
+models/downloads/
+*.pt
+*.pth
+*.onnx
+*.bin
+
+# Executable Binaries & JAR files (exceeds GitHub 100MB limit)
+*.jar
+*.war
+*.ear
+apps/api/tools/*.jar
+
+# ------------------------------------------------------------------------------
+# 6. Data, Exports, Uploads & Media Files
+# ------------------------------------------------------------------------------
+data/exports/
+data/synthetic/*.pdf
+data/uploads/
+data/temp/
+*.wav
+*.mp3
+*.ogg
+*.flac
+*.m4a
+
+# ------------------------------------------------------------------------------
+# 7. Databases & Local Storage
+# ------------------------------------------------------------------------------
+*.sqlite3
+*.sqlite
+*.db
+*.db-journal
+*.db-wal
+
+# ------------------------------------------------------------------------------
+# 8. Operating System & Editor / IDE Files
+# ------------------------------------------------------------------------------
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# IDEs & Editors
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+*.sublime-workspace
+*.sublime-project
+*.swp
+*.swo
+*~
+
+# ------------------------------------------------------------------------------
+# 9. Logs & Temporary Files
+# ------------------------------------------------------------------------------
+*.log
+logs/
+temp/
+tmp/

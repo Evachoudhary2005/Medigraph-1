@@ -1,0 +1,17 @@
+{
+  "dorzolamidum": {
+    "generic": "Dorzolamide",
+    "class": "drug",
+    "confidence": 0.8
+  },
+  "oxprenolol": {
+    "generic": "Oxprenolol",
+    "class": "drug",
+    "confidence": 0.9
+  },
+  "vexidsp": {
+    "generic": "Dexmedetomidine",
+    "class": "Anesthetic",
+    "confidence": 0.9
+  }
+}
