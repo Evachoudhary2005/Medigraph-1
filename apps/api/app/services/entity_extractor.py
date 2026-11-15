@@ -193,10 +193,90 @@ def extract_date(text: str) -> Optional[dict]:
     return None
 
 
+def extract_labs_and_vitals(text: str) -> list[dict]:
+    """Extract clinical biomarkers & vital signs from verified OCR text."""
+    facts = []
+    t = text or ""
+
+    # Blood Pressure: 130/85, BP 120/80
+    bp_m = re.search(r"\b(?:bp|blood\s*pressure)\s*[:=-]?\s*(\d{2,3})\s*[/xX]\s*(\d{2,3})\s*(?:mm\s*hg)?\b", t, re.I)
+    if bp_m:
+        sys_val = int(bp_m.group(1))
+        dia_val = int(bp_m.group(2))
+        facts.append({
+            "kind": "vital",
+            "label": "Blood Pressure",
+            "value": f"{sys_val}/{dia_val} mmHg",
+            "normalized": {"systolic": sys_val, "diastolic": dia_val, "unit": "mmHg"},
+            "source_text": bp_m.group(0),
+            "confidence": 0.95,
+            "needs_review": False,
+        })
+
+    # Glucose / Sugar: FBS 110 mg/dL, Blood Sugar: 140
+    glu_m = re.search(r"\b(?:fbs|rbs|ppbs|blood\s*sugar|glucose)\s*[:=-]?\s*(\d{2,3}(?:\.\d+)?)\s*(?:mg\s*/\s*dl)?\b", t, re.I)
+    if glu_m:
+        g_val = float(glu_m.group(1))
+        facts.append({
+            "kind": "lab_value",
+            "label": "Fasting Blood Glucose",
+            "value": f"{g_val} mg/dL",
+            "normalized": {"value": g_val, "unit": "mg/dL"},
+            "source_text": glu_m.group(0),
+            "confidence": 0.92,
+            "needs_review": False,
+        })
+
+    # Serum Creatinine: S. Creatinine 1.2 mg/dL
+    cr_m = re.search(r"\b(?:s\.?\s*creatinine|serum\s*creatinine|creatinine)\s*[:=-]?\s*(\d{1,2}(?:\.\d+)?)\s*(?:mg\s*/\s*dl)?\b", t, re.I)
+    if cr_m:
+        cr_val = float(cr_m.group(1))
+        facts.append({
+            "kind": "lab_value",
+            "label": "Serum Creatinine",
+            "value": f"{cr_val} mg/dL",
+            "normalized": {"value": cr_val, "unit": "mg/dL"},
+            "source_text": cr_m.group(0),
+            "confidence": 0.92,
+            "needs_review": False,
+        })
+
+    # Total Cholesterol
+    chol_m = re.search(r"\b(?:total\s*cholesterol|cholesterol)\s*[:=-]?\s*(\d{2,3})\s*(?:mg\s*/\s*dl)?\b", t, re.I)
+    if chol_m:
+        ch_val = int(chol_m.group(1))
+        facts.append({
+            "kind": "lab_value",
+            "label": "Total Cholesterol",
+            "value": f"{ch_val} mg/dL",
+            "normalized": {"value": ch_val, "unit": "mg/dL"},
+            "source_text": chol_m.group(0),
+            "confidence": 0.90,
+            "needs_review": False,
+        })
+
+    # Pulse / Heart rate: Pulse: 78 bpm
+    pulse_m = re.search(r"\b(?:pulse|heart\s*rate|hr)\s*[:=-]?\s*(\d{2,3})\s*(?:bpm|/min)?\b", t, re.I)
+    if pulse_m:
+        p_val = int(pulse_m.group(1))
+        facts.append({
+            "kind": "vital",
+            "label": "Pulse Rate",
+            "value": f"{p_val} bpm",
+            "normalized": {"value": p_val, "unit": "bpm"},
+            "source_text": pulse_m.group(0),
+            "confidence": 0.92,
+            "needs_review": False,
+        })
+
+    return facts
+
+
 def extract_all(text: str) -> list[dict]:
     facts = []
     facts.extend(extract_medications(text))
     facts.extend(extract_demographics(text))
+    facts.extend(extract_labs_and_vitals(text))
     d = extract_date(text)
     if d:
         facts.append(d)

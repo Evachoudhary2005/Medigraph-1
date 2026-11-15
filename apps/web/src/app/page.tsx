@@ -337,9 +337,12 @@ function Hero() {
               Start patient intake
               <span className="group-hover:translate-x-0.5 transition-transform"><IconArrow /></span>
             </Link>
-            <a href="#demo" className="px-6 py-3 rounded-lg bg-white/10 border border-white/20 text-white font-medium hover:bg-white/20 transition-all hover:-translate-y-0.5">
-              See it work
-            </a>
+            <Link href="/patient" className="px-6 py-3 rounded-lg bg-blue-600/90 hover:bg-blue-600 border border-blue-400/30 text-white font-medium transition-all hover:-translate-y-0.5 inline-flex items-center gap-2">
+              Patient Portal
+            </Link>
+            <Link href="/clinician" className="px-6 py-3 rounded-lg bg-white/10 border border-white/20 text-white font-medium hover:bg-white/20 transition-all hover:-translate-y-0.5">
+              Clinician Dashboard
+            </Link>
           </div>
 
           <div className="mt-14 grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-2xl">
@@ -1388,6 +1391,7 @@ function FinalCTA() {
           <p className="relative mt-4 text-blue-100 max-w-xl mx-auto">Walk through the full pipeline: intake, upload, AI summary, and FHIR export.</p>
           <div className="relative mt-8 flex flex-wrap gap-3 justify-center">
             <Link href="/intake" className="px-6 py-3 rounded-lg bg-white text-blue-700 font-medium hover:bg-blue-50 transition shadow-lg hover:-translate-y-0.5">Start patient intake</Link>
+            <Link href="/patient" className="px-6 py-3 rounded-lg bg-white/20 border border-white/30 text-white font-medium hover:bg-white/30 transition">Patient Portal</Link>
             <Link href="/clinician" className="px-6 py-3 rounded-lg bg-white/10 border border-white/30 text-white font-medium hover:bg-white/20 transition">Open clinician dashboard</Link>
           </div>
         </div>
@@ -1403,6 +1407,7 @@ function Footer() {
         <div><span className="font-semibold text-slate-800 dark:text-slate-200">MediGraph</span> - capstone project, MIET Jammu</div>
         <div className="flex gap-6">
           <Link href="/intake" className="hover:text-slate-800 dark:hover:text-slate-200">Intake</Link>
+          <Link href="/patient" className="hover:text-slate-800 dark:hover:text-slate-200">Patient Portal</Link>
           <Link href="/clinician" className="hover:text-slate-800 dark:hover:text-slate-200">Clinician</Link>
           <Link href="/login" className="hover:text-slate-800 dark:hover:text-slate-200">Sign in</Link>
         </div>

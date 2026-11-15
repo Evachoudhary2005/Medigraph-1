@@ -24,6 +24,8 @@ export default function Header() {
   if (pathname === "/login") return null;
   if (pathname === "/intake") return null;
   if (pathname.startsWith("/intake/")) return null;
+  if (pathname === "/patient") return null;
+  if (pathname.startsWith("/patient/")) return null;
 
   return (
     <header
@@ -77,6 +79,9 @@ export default function Header() {
         <nav className="hidden md:flex items-center gap-1 text-sm">
           <HeaderLink href="/intake"     pathname={pathname} scrolled={scrolled} isLanding={isLanding}>
             Intake
+          </HeaderLink>
+          <HeaderLink href="/patient"    pathname={pathname} scrolled={scrolled} isLanding={isLanding}>
+            Patient Portal
           </HeaderLink>
           <HeaderLink href="/clinician"  pathname={pathname} scrolled={scrolled} isLanding={isLanding}>
             Clinician

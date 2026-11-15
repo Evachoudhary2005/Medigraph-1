@@ -75,6 +75,11 @@ def revoke_consent(consent_id: str, actor: str = "patient",
 
 @router.get("/patient/{patient_id}")
 def list_consents(patient_id: str, db: Session = Depends(get_db)):
+    p = db.get(Patient, patient_id)
+    if not p:
+        p = db.query(Patient).filter(Patient.synthetic_id.ilike(patient_id)).first()
+    if p:
+        patient_id = p.id
     rows = db.query(Consent).filter_by(patient_id=patient_id).all()
     return [
         {"id": r.id, "purpose": r.purpose, "granted": r.granted,

@@ -396,11 +396,20 @@ export default function IntakeQuestionnairePage({ params }: { params: { patientI
 
             <div className="mt-6 flex flex-col gap-2">
               {pipelineStage === "done" && (
-                <button
-                  onClick={() => setCompleted(false)}
-                  className="px-4 py-2.5 rounded-lg text-sm font-medium bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 transition-colors">
-                  {lang === "en" ? "Review my answers" : "\u0909\u0924\u094d\u0924\u0930 \u0926\u0947\u0916\u0947\u0902"}
-                </button>
+                <>
+                  <Link
+                    href={`/patient/${patientId}`}
+                    className="w-full text-center px-4 py-2.5 rounded-xl text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors shadow-md shadow-blue-500/25"
+                  >
+                    {lang === "en" ? "Open My Patient Dashboard →" : "मेरा रोगी डैशबोर्ड खोलें →"}
+                  </Link>
+                  <button
+                    onClick={() => setCompleted(false)}
+                    className="px-4 py-2 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+                  >
+                    {lang === "en" ? "Review my answers" : "उत्तर देखें"}
+                  </button>
+                </>
               )}
               {pipelineStage === "error" && (
                 <button

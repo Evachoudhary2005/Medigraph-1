@@ -90,22 +90,131 @@ def list_patients_with_stats(db: Session = Depends(get_db)):
     return out
 
 
-@router.get("/{patient_id}", response_model=PatientOut)
-def get_patient(patient_id: str, db: Session = Depends(get_db)):
+def _resolve_patient(db: Session, patient_id: str) -> Patient:
     p = db.get(Patient, patient_id)
     if not p:
-        raise HTTPException(404, "not found")
+        p = db.query(Patient).filter(Patient.synthetic_id.ilike(patient_id)).first()
+    if not p:
+        raise HTTPException(404, "patient not found")
     return p
+
+
+@router.get("/{patient_id}", response_model=PatientOut)
+def get_patient(patient_id: str, db: Session = Depends(get_db)):
+    return _resolve_patient(db, patient_id)
+
+
+@router.get("/{patient_id}/biomarkers")
+def get_patient_biomarkers_endpoint(patient_id: str, db: Session = Depends(get_db)):
+    """Return longitudinal biomarker trends, trajectory slopes, and clinical thresholds."""
+    from app.services.biomarker_trends import get_patient_biomarkers
+    try:
+        return get_patient_biomarkers(db, patient_id)
+    except ValueError:
+        raise HTTPException(404, "patient not found")
+
+
+@router.get("/{patient_id}/export")
+def export_patient_data(patient_id: str, db: Session = Depends(get_db)):
+    """Export complete patient data package for DPDP Act data portability."""
+    import json
+    from datetime import datetime
+    from fastapi.responses import JSONResponse
+    from app.models.summary_draft import SummaryDraft
+
+    p = _resolve_patient(db, patient_id)
+    real_id = p.id
+
+    consents = db.query(Consent).filter_by(patient_id=real_id).all()
+    events = (
+        db.query(TimelineEvent)
+        .filter_by(patient_id=real_id)
+        .order_by(TimelineEvent.event_date.asc().nullslast())
+        .all()
+    )
+    docs = db.query(Document).filter_by(patient_id=real_id).all()
+    facts = db.query(ClinicalFact).filter_by(patient_id=real_id).all()
+    drafts = (
+        db.query(SummaryDraft)
+        .filter_by(patient_id=real_id)
+        .order_by(SummaryDraft.version.desc())
+        .all()
+    )
+
+    data = {
+        "export_metadata": {
+            "format": "MediGraph-DPDP-Export-v1",
+            "exported_at": datetime.utcnow().isoformat() + "Z",
+            "jurisdiction": "Digital Personal Data Protection Act 2023 (India)",
+        },
+        "patient": {
+            "id": p.id,
+            "synthetic_id": p.synthetic_id,
+            "preferred_language": p.preferred_language,
+            "created_at": p.created_at.isoformat() if p.created_at else None,
+        },
+        "consents": [
+            {
+                "id": c.id,
+                "purpose": c.purpose,
+                "granted": c.granted,
+                "notes": c.notes,
+                "created_at": c.created_at.isoformat() if c.created_at else None,
+                "revoked_at": c.revoked_at.isoformat() if c.revoked_at else None,
+            }
+            for c in consents
+        ],
+        "timeline_events": [
+            {
+                "id": e.id,
+                "date": e.event_date.isoformat() if e.event_date else None,
+                "kind": e.kind,
+                "label": e.label,
+                "value": e.value,
+                "normalized": json.loads(e.normalized_json or "{}"),
+                "source": e.source,
+                "confidence": e.confidence,
+                "verification_status": e.verification_status,
+            }
+            for e in events
+        ],
+        "documents": [
+            {
+                "id": d.id,
+                "filename": d.filename,
+                "file_type": d.file_type,
+                "status": d.status,
+                "created_at": d.created_at.isoformat() if d.created_at else None,
+            }
+            for d in docs
+        ],
+        "clinical_facts_count": len(facts),
+        "summary_drafts": [
+            {
+                "version": dr.version,
+                "status": dr.status,
+                "actor": dr.actor,
+                "narrative": dr.narrative,
+                "notes": dr.notes,
+                "created_at": dr.created_at.isoformat() if dr.created_at else None,
+            }
+            for dr in drafts
+        ],
+    }
+
+    filename = f"medigraph-export-{p.synthetic_id}.json"
+    return JSONResponse(
+        content=data,
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 @router.post("/{patient_id}/consents")
 def add_consent(patient_id: str, payload: ConsentCreate, db: Session = Depends(get_db)):
-    p = db.get(Patient, patient_id)
-    if not p:
-        raise HTTPException(404, "patient not found")
+    p = _resolve_patient(db, patient_id)
     c = Consent(
         id=str(uuid4()),
-        patient_id=patient_id,
+        patient_id=p.id,
         purpose=payload.purpose,
         granted=payload.granted,
         notes=payload.notes,
@@ -114,3 +223,35 @@ def add_consent(patient_id: str, payload: ConsentCreate, db: Session = Depends(g
     db.commit()
     db.refresh(c)
     return {"id": c.id, "purpose": c.purpose, "granted": c.granted}
+
+
+@router.get("/{patient_id}/prescription")
+def get_patient_prescription_endpoint(patient_id: str, db: Session = Depends(get_db)):
+    """Return structured clinical prescription and care plan JSON for preview."""
+    from app.services.prescription_service import extract_patient_prescription_data
+    try:
+        return extract_patient_prescription_data(db, patient_id)
+    except ValueError:
+        raise HTTPException(404, "patient not found")
+
+
+@router.get("/{patient_id}/prescription/pdf")
+def get_patient_prescription_pdf_endpoint(patient_id: str, db: Session = Depends(get_db)):
+    """Generate and download ABDM & DPDP Act compliant bilingual prescription PDF."""
+    from fastapi.responses import Response
+    from app.services.prescription_service import (
+        extract_patient_prescription_data,
+        generate_prescription_pdf,
+    )
+    try:
+        data = extract_patient_prescription_data(db, patient_id)
+    except ValueError:
+        raise HTTPException(404, "patient not found")
+
+    pdf_bytes = generate_prescription_pdf(data)
+    filename = f"Prescription-{data.get('synthetic_id', 'Patient')}.pdf"
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )

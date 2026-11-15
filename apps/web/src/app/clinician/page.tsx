@@ -325,9 +325,12 @@ export default function ClinicianDashboard() {
                     {/* Name + meta */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-sm font-semibold text-slate-900 dark:text-white">
+                        <Link
+                          href={"/clinician/" + p.id}
+                          className="text-sm font-semibold text-slate-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 hover:underline transition-colors"
+                        >
                           {p.synthetic_id}
-                        </span>
+                        </Link>
                         <span className="text-[10px] uppercase tracking-widest font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
                           {p.preferred_language}
                         </span>
@@ -363,6 +366,30 @@ export default function ClinicianDashboard() {
 
                     {/* Actions */}
                     <div className="flex items-center gap-1.5 shrink-0">
+                      <Link
+                        href={"/clinician/" + p.id}
+                        className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900 border border-blue-200 dark:border-blue-900 text-[11px] font-semibold text-blue-700 dark:text-blue-300 transition-colors"
+                      >
+                        📈 Biomarkers & 360
+                      </Link>
+                      <a
+                        href={`/api/v1/patients/${p.id}/prescription/pdf`}
+                        download
+                        className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900 border border-emerald-200 dark:border-emerald-900 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 transition-colors"
+                        title="Download Official Prescription PDF"
+                      >
+                        📄 Rx PDF
+                      </a>
+                      <IconLink href={"/clinician/" + p.id} title="360 Overview">
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10" />
+                          <circle cx="12" cy="12" r="4" />
+                          <line x1="4.93" y1="4.93" x2="9.17" y2="9.17" />
+                          <line x1="14.83" y1="14.83" x2="19.07" y2="19.07" />
+                          <line x1="14.83" y1="9.17" x2="19.07" y2="4.93" />
+                          <line x1="4.93" y1="19.07" x2="9.17" y2="14.83" />
+                        </svg>
+                      </IconLink>
                       <IconLink href={"/clinician/" + p.id + "/timeline"} title="Timeline">
                         <IconChart />
                       </IconLink>
@@ -372,8 +399,8 @@ export default function ClinicianDashboard() {
                       <IconLink href={"/clinician/" + p.id + "/orchestrate"} title="Pipeline">
                         <IconGit />
                       </IconLink>
-                      <IconLink href={"/intake/" + p.id + "/documents"} title="Documents">
-                        <IconDoc />
+                      <IconLink href={"/patient/" + p.id} title="Patient View">
+                        <IconUser />
                       </IconLink>
                     </div>
                   </div>

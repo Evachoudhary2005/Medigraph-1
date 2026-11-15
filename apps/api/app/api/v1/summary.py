@@ -34,7 +34,10 @@ def _event_to_dict(e: TimelineEvent) -> dict:
 def get_summary(patient_id: str, db: Session = Depends(get_db)):
     p = db.get(Patient, patient_id)
     if not p:
+        p = db.query(Patient).filter(Patient.synthetic_id.ilike(patient_id)).first()
+    if not p:
         raise HTTPException(404, "patient not found")
+    patient_id = p.id
 
     events = (
         db.query(TimelineEvent)
@@ -58,6 +61,11 @@ def get_summary(patient_id: str, db: Session = Depends(get_db)):
 
 @router.get("/{patient_id}/alerts")
 def get_alerts(patient_id: str, db: Session = Depends(get_db)):
+    p = db.get(Patient, patient_id)
+    if not p:
+        p = db.query(Patient).filter(Patient.synthetic_id.ilike(patient_id)).first()
+    if p:
+        patient_id = p.id
     events = (
         db.query(TimelineEvent)
         .filter_by(patient_id=patient_id)
@@ -85,7 +93,10 @@ def save_draft(patient_id: str, payload: SaveDraftRequest,
 
     p = db.get(Patient, patient_id)
     if not p:
+        p = db.query(Patient).filter(Patient.synthetic_id.ilike(patient_id)).first()
+    if not p:
         raise HTTPException(404, "patient not found")
+    patient_id = p.id
 
     # next version number
     prev = (
@@ -209,7 +220,10 @@ def export_pdf(patient_id: str, db: Session = Depends(get_db)):
 
     p = db.get(Patient, patient_id)
     if not p:
+        p = db.query(Patient).filter(Patient.synthetic_id.ilike(patient_id)).first()
+    if not p:
         raise HTTPException(404, "patient not found")
+    patient_id = p.id
 
     events = (
         db.query(TimelineEvent)
@@ -257,7 +271,10 @@ def generate_ai_summary(patient_id: str, actor: str = "clinician",
 
     p = db.get(Patient, patient_id)
     if not p:
+        p = db.query(Patient).filter(Patient.synthetic_id.ilike(patient_id)).first()
+    if not p:
         raise HTTPException(404, "patient not found")
+    patient_id = p.id
 
     result = generate_narrative(patient_id, db)
 

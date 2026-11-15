@@ -6,8 +6,8 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Optional
 
+import bcrypt
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -15,16 +15,15 @@ from app.models.user import User
 
 log = logging.getLogger("medigraph.auth")
 
-_pwd = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 
 def hash_password(plain: str) -> str:
-    return _pwd.hash(plain)
+    pwd_bytes = plain.encode("utf-8")[:72]
+    return bcrypt.hashpw(pwd_bytes, bcrypt.gensalt()).decode("utf-8")
 
 
 def verify_password(plain: str, hashed: str) -> bool:
     try:
-        return _pwd.verify(plain, hashed)
+        return bcrypt.checkpw(plain.encode("utf-8")[:72], hashed.encode("utf-8"))
     except Exception:
         return False
 

@@ -142,6 +142,11 @@ def verify_document(document_id: str, db: Session = Depends(get_db)):
 
 @router.get("")
 def list_documents(patient_id: str, db: Session = Depends(get_db)):
+    p = db.get(Patient, patient_id)
+    if not p:
+        p = db.query(Patient).filter(Patient.synthetic_id.ilike(patient_id)).first()
+    if p:
+        patient_id = p.id
     docs = (
         db.query(Document)
         .filter_by(patient_id=patient_id)
